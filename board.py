@@ -3,12 +3,12 @@
 class Board:
 	def __init__(self):
 		self.board =  [['r','n','b','q','k','b','n','r'],
-					   ['p','p','p','p','p','p','p','p'],
+					   ['p']*8,
 					   ['0']*8,
 					   ['0']*8,
 					   ['0']*8,
 					   ['0']*8,
-					   ['P','P','P','P','P','P','P','P'],
+					   ['P']*8,
 					   ['R','N','B','Q','K','B','N','R']]
 		self.empty_space = '0'
 		self.white_rook = 'R'

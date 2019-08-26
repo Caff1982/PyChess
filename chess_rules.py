@@ -1,5 +1,3 @@
-import pygame
-
 from board import Board
 
 
@@ -44,11 +42,10 @@ class ChessRules:
 		to_col = int(to_square[1])
 		from_piece = board[from_row][from_col]
 		to_piece = board[to_row][to_col]
-
 		if from_square == to_square:
 			return False
 
-		if from_piece == 'P':
+		elif from_piece == 'P':
 			# normal move forward
 			if to_row == from_row-1 and to_col == from_col and to_piece == '0':
 				return True
@@ -128,6 +125,9 @@ class ChessRules:
 			if abs(from_row-to_row) <=1 and abs(from_col-to_col) <=1 and (to_piece == '0' or to_piece.islower()):
 				return True
 
+		elif self.is_check(board, player):
+			return False
+
 		return False
 
 	def is_check(self, board, player):
@@ -144,19 +144,21 @@ class ChessRules:
 					if board[i][j] == 'k':
 						king_square = (i, j)
 						break
-
+		# search through all pieces to find any valid moves
 		if player == 'White':		
 				for i in range(8):
 					for j in range(8):
-						if board[i][j].islower():
-							if self.is_valid_move((i, j), king_square, board, 'Black'):
-								return True
+						if board[i][j]:
+							if board[i][j].islower():
+								if self.is_valid_move((i, j), king_square, board, 'Black'):
+									return True
 		if player == 'Black':		
 				for i in range(8):
 					for j in range(8):
-						if not board[i][j].islower():
-							if self.is_valid_move((i, j), king_square, board, 'White'):
-								return True
+						if board[i][j]:
+							if board[i][j].isupper():
+								if self.is_valid_move((i, j), king_square, board, 'White'):
+									return True
 
 	def is_checkmate(self, board, player):
 		all_valid_moves = []
@@ -164,12 +166,12 @@ class ChessRules:
 			for i in range(8):
 				for j in range(8):
 					if board[i][j].islower():
-						all_valid_moves.extend(list_valid_moves(((i,j), player)))
+						all_valid_moves.extend(self.list_valid_moves((i,j), board, player))
 		elif player == 'Black':
 			for i in range(8):
 				for j in range(8):
 					if board[i][j].isupper():
-						all_valid_moves.extend(list_valid_moves(((i,j), player)))
+						all_valid_moves.extend(self.list_valid_moves((i,j), board, player))
 		if len(all_valid_moves) == 0:
 			return True
 		else:
