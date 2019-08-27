@@ -1,15 +1,18 @@
 
 
 class Board:
-	def __init__(self):
-		self.board =  [['r','n','b','q','k','b','n','r'],
-					   ['p']*8,
-					   ['0']*8,
-					   ['0']*8,
-					   ['0']*8,
-					   ['0']*8,
-					   ['P']*8,
-					   ['R','N','B','Q','K','B','N','R']]
+	def __init__(self, board=None):
+		if board == None:
+			self.board =  [['r','n','b','q','k','b','n','r'],
+						   ['p']*8,
+						   ['0']*8,
+						   ['0']*8,
+						   ['0']*8,
+						   ['0']*8,
+						   ['P']*8,
+						   ['R','N','B','Q','K','B','N','R']]
+		else:
+			self.board = board
 		self.empty_space = '0'
 		self.white_rook = 'R'
 		self.white_knight = 'N'

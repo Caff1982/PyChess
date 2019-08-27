@@ -125,40 +125,33 @@ class ChessRules:
 			if abs(from_row-to_row) <=1 and abs(from_col-to_col) <=1 and (to_piece == '0' or to_piece.islower()):
 				return True
 
-		elif self.is_check(board, player):
-			return False
-
 		return False
 
 	def is_check(self, board, player):
-		# First find player's king square
-		if player == 'White':
-			for i in range(8):
-				for j in range(8):
-					if board[i][j] == 'K':
-						king_square = (i, j)
-						break
-		elif player == 'Black':
-			for i in range(8):
-				for j in range(8):
-					if board[i][j] == 'k':
-						king_square = (i, j)
-						break
-		# search through all pieces to find any valid moves
-		if player == 'White':		
-				for i in range(8):
-					for j in range(8):
-						if board[i][j]:
-							if board[i][j].islower():
-								if self.is_valid_move((i, j), king_square, board, 'Black'):
-									return True
-		if player == 'Black':		
-				for i in range(8):
-					for j in range(8):
-						if board[i][j]:
-							if board[i][j].isupper():
-								if self.is_valid_move((i, j), king_square, board, 'White'):
-									return True
+		# First find player's king square, white then black
+		for i in range(8):
+			for j in range(8):
+				if board[i][j] == 'K':
+					king_square = (i, j)
+					break
+		for i in range(8):
+			for j in range(8):
+				if board[i][j] == 'k':
+					king_square = (i, j)
+					break
+		# search through all pieces to find any valid moves	
+		for i in range(8):
+			for j in range(8):
+				if board[i][j]:
+					if board[i][j].isupper():
+						if self.is_valid_move((i, j), king_square, board, 'White'):
+							return True
+		for i in range(8):
+			for j in range(8):
+				if board[i][j]:
+					if board[i][j].islower():
+						if self.is_valid_move((i, j), king_square, board, 'Black'):
+							return True	
 
 	def is_checkmate(self, board, player):
 		all_valid_moves = []
@@ -185,6 +178,20 @@ class ChessRules:
 				if self.is_valid_move(from_square, (i,j), board, player):
 					valid_moves.append((from_square, (i, j)))
 		return valid_moves
+
+	def get_all_possible_moves(self, board, color):
+		moves = []
+		if color == 'White':
+			for i in range(8):
+				for j in range(8):
+					if board[i][j].isupper():
+						moves.extend(self.rules.list_valid_moves((i,j), board, color))
+		if color == 'Black':
+			for i in range(8):
+				for j in range(8):
+					if board[i][j].islower():
+						moves.extend(self.rules.list_valid_moves((i,j), board, color))
+		return moves
 
 # if __name__ == '__main__':
 # 	game = ChessRules()

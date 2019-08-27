@@ -68,7 +68,6 @@ class GUI:
 				if self.board.board[col][row].isalpha():
 					piece = getattr(self, self.board.board[col][row])
 					self.screen.blit(piece, (row*self.square_size+b, col*self.square_size+b))
-
 		pygame.display.update()
 
 	def run(self):	
@@ -140,10 +139,10 @@ class GUI:
 					self.to_piece = None
 
 					# AI to make move
-					AI_move = self.ai.depth_search(self.board.board, 'Black', 4)
+					AI_move = self.ai.depth_search(self.board.board, 'Black', 3)
 					print(AI_move)
-					self.board.move_piece(AI_move[0][0], AI_move[0][1])
-
+					self.board.move_piece(AI_move[0], AI_move[1])
+					self.board.print_board()
 			# if event.type == pygame.MOUSEMOTION:
 			# 	rel_x = event.rel[0]
 			# 	rel_y = event.rel[1]
