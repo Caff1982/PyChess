@@ -1,10 +1,11 @@
 from chess_rules import ChessRules
 from player import Player
 from board import Board
+from piece_tables import *
 
-import copy
 import time
 import random
+
 
 class ChessAI:
 
@@ -13,62 +14,35 @@ class ChessAI:
 		self.rules = ChessRules()
 		self.color = color
 
-	def depth_search(self, board, color, depth):
-		# my_move = None, 0
+	def get_best_move(self, board, is_maximizing, depth):
 		best_move = -99999
 		best_move_final = None
-		moves = self.get_possible_moves(board, color)
-		if color == 'Black':
-			is_maximizing = True
-		else:
-			is_maximizing = False
 
-		for move in moves:
-			testboard = self.get_testboard(move[0], move[1], board)
-			# if color == 'Black':
-			# 	best_reply = -1000000
-			# 	best_reply = self.minimax(testboard, float('-inf'), float('inf'), depth=depth-1, False)
-			# else:
-			# 	best_reply = 1000000
-			# 	best_reply = self.minimax(testboard, float('inf'), float('-inf'),depth=depth-1, True)
-			
-			value = max(best_move, self.minimax(testboard, float('-inf'), float('inf'), not is_maximizing, depth=depth-1))
+		for move in self.get_possible_moves(board, 'Black'):
+			testboard = board.get_testboard(move[0], move[1], board)
+		
+			value = max(best_move, self.minimax(testboard, float('-inf'), float('inf'), not is_maximizing, depth-1))
 			if value > best_move:
-				print('Best score', best_move)
-				print('Best move:', best_move_final)
-				best_move = value
-				best_move_final = move
+				if not self.rules.is_check(testboard, 'Black'):
+					print('Best score', best_move)
+					print('Best move:', best_move_final)
+					best_move = value
+					best_move_final = move
 
 		return best_move_final
-
-		# 	# DEBUGGING
-		# 	print(move, best_reply)
-		# 	# b = Board(testboard)
-		# 	# b.print_board()
-		# 	if my_move[1] < -best_reply and not self.rules.is_check(testboard, color):
-		# 		my_move = move, -best_reply
-		# # if no best move found return last move checked
-		# if my_move[0] is not None:
-		# 	return my_move
-		# if not self.rules.is_check(testboard, color):
-		# 	return move, 0
-		# else:
-		# 	print("Checkmate!")
-		# 	return my_move
-
 
 	def minimax(self, board, alpha, beta, is_maximizing, depth):
 		# set base case
 		if depth == 0:
-			return -self.get_evaluation(board)
-		# shuffle moves to add randomness
+			return -self.get_evaluation(board.board)
+
 		moves = self.get_all_possible_moves(board)
 		
 		if is_maximizing:
 			best_move = -99999
 			for move in moves:
-				testboard = self.get_testboard(move[0], move[1], board)
-				best_move = max(best_move, self.minimax(testboard, alpha, beta, not is_maximizing, depth=depth-1))
+				testboard = board.get_testboard(move[0], move[1], board)
+				best_move = max(best_move, self.minimax(testboard, alpha, beta, not is_maximizing, depth-1))
 				alpha = max(alpha, best_move)
 				if beta <= alpha:
 					return best_move
@@ -76,16 +50,38 @@ class ChessAI:
 		else:
 			best_move = 99999
 			for move in moves:
-				testboard = self.get_testboard(move[0], move[1], board)
-				best_move = min(best_move, self.minimax(testboard, alpha, beta, not is_maximizing, depth=depth-1))
+				testboard = board.get_testboard(move[0], move[1], board)
+				best_move = min(best_move, self.minimax(testboard, alpha, beta, not is_maximizing, depth-1))
 				beta = min(beta, best_move)
 				if beta <= alpha:
 					return best_move
 			return best_move
 
+	def get_board_value(self, board, piece_type, table):
+		# TODO: Should this be in a transposition tables class?
+		white = 0
+		black = 0
+		for i in range(8):
+			for j in range(8):
+				piece = board[i][j]
+				if piece == piece_type.lower():
+					if piece.isupper():
+						white += table[i][j]
+					else:
+						black += table[i][j]
+		return white - black
+
 	def get_evaluation(self, board):
 		# scans through rows and cols and counts value of pieces
 		evaluation = 0
+		# get heuristic values of board first 
+		evaluation += self.get_board_value(board, 'p', PAWN_TABLE)
+		evaluation += self.get_board_value(board, 'n', KNIGHT_TABLE)
+		evaluation += self.get_board_value(board, 'b', BISHOP_TABLE)
+		evaluation += self.get_board_value(board, 'r', ROOK_TABLE)
+		evaluation += self.get_board_value(board, 'q', QUEEN_TABLE)
+		evaluation += self.get_board_value(board, 'k', KING_TABLE)
+
 		for i in range(8):
 			for j in range(8):
 				evaluation += self.get_piece_value(board[i][j])
@@ -95,41 +91,41 @@ class ChessAI:
 		if piece == '0':
 			return 0
 		elif piece == 'P':
-			return 1
+			return 100
 		elif piece == 'p':
-			return -1
+			return -100
 		elif piece == 'N':
-			return 3
+			return 300
 		elif piece == 'n':
-			return -3
+			return -300
 		elif piece == 'B':
-			return 3
+			return 300
 		elif piece == 'b':
-			return -3
+			return -300
 		elif piece == 'R':
-			return 5
+			return 500
 		elif piece == 'r':
-			return -5
+			return -500
 		elif piece == 'Q':
-			return 9
+			return 900
 		elif piece == 'q':
-			return -9
+			return -900
 		elif piece == 'K':
-			return 90
+			return 9000
 		elif piece == 'k':
-			return -90
+			return -9000
 			
 	def get_possible_moves(self, board, color):
 		moves = []
-		if color == 'White':
-			for i in range(8):
-				for j in range(8):
-					if board[i][j].isupper():
-						moves.extend(self.rules.list_valid_moves((i,j), board, color))
+		# if color == 'White':
+		# 	for i in range(8):
+		# 		for j in range(8):
+		# 			if board.board[i][j].isupper():
+		# 				moves.extend(self.rules.list_valid_moves((i,j), board, color))
 		if color == 'Black':
 			for i in range(8):
 				for j in range(8):
-					if board[i][j].islower():
+					if board.board[i][j].islower():
 						moves.extend(self.rules.list_valid_moves((i,j), board, color))
 		return moves
 
@@ -137,25 +133,16 @@ class ChessAI:
 		moves = []
 		for i in range(8):
 			for j in range(8):
-				if board[i][j].isupper():
+				if board.board[i][j].isupper():
 					moves.extend(self.rules.list_valid_moves((i,j), board, 'white'))
 		for i in range(8):
 			for j in range(8):
-				if board[i][j].islower():
+				if board.board[i][j].islower():
 					moves.extend(self.rules.list_valid_moves((i,j), board, 'black'))
 		return moves
 
 
-	def get_testboard(self, from_square, to_square, board):
-		testboard = copy.deepcopy(board)
-		from_row = from_square[0]
-		from_col = from_square[1]
-		to_row = to_square[0]
-		to_col = to_square[1]
-		piece = board[from_row][from_col]
-		testboard[from_row][from_col] = '0'
-		testboard[to_row][to_col] = piece
-		return testboard
+
 
 # if __name__ == '__main__':
 # 	# player1 is human for debugging

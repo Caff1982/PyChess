@@ -4,8 +4,7 @@ from board import Board
 class ChessRules:
 
 	def is_clear_path(self, from_row, from_col, to_row, to_col, board):
-		# Base case, if only moving one square path is clear
-		
+		# Base case, if only moving one square path is clear	
 		if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1:
 			return True
 		else:
@@ -36,22 +35,23 @@ class ChessRules:
 			return self.is_clear_path(from_row, from_col, to_row, to_col, board)
 
 	def is_valid_move(self, from_square, to_square, board, player):
-		from_row = int(from_square[0])
-		from_col = int(from_square[1])
-		to_row = int(to_square[0])
-		to_col = int(to_square[1])
-		from_piece = board[from_row][from_col]
-		to_piece = board[to_row][to_col]
-		if from_square == to_square:
-			return False
+		"""
+		takes board object as arg
+		"""
+		from_row = from_square[0]
+		from_col = from_square[1]
+		to_row = to_square[0]
+		to_col = to_square[1]
+		from_piece = board.board[from_row][from_col]
+		to_piece = board.board[to_row][to_col]
 
-		elif from_piece == 'P':
+		if from_piece == 'P':
 			# normal move forward
 			if to_row == from_row-1 and to_col == from_col and to_piece == '0':
 				return True
 			# move two squares at start
 			elif to_row == from_row-2 and to_col == from_col and to_piece == '0' and from_row == 6: 
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 			# move diagonally to take
 			elif to_row == from_row-1 and (to_col== from_col+1 or to_col == from_col-1) and to_piece.islower():
@@ -61,27 +61,27 @@ class ChessRules:
 			if to_row == from_row+1 and to_col == from_col and to_piece == '0':
 				return True
 			elif to_row == from_row+2 and to_col == from_col and to_piece == '0' and from_row == 1: 
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 			elif to_row == from_row+1 and (to_col == from_col+1 or to_col == from_col-1) and to_piece.isupper():
 				return True
 
 		elif from_piece == 'R':
 			if (from_row == to_row or from_col == to_col) and (to_piece == '0' or to_piece.islower()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 		elif from_piece == 'r':
 			if (from_row == to_row or from_col == to_col) and (to_piece == '0' or to_piece.isupper()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 
 		elif from_piece == 'B':
 			if abs(to_row - from_row) == abs(to_col - from_col) and (to_piece == '0' or to_piece.islower()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 		elif from_piece == 'b':
 			if abs(to_row - from_row) == abs(to_col - from_col) and (to_piece == '0' or to_piece.isupper()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 
 		elif from_piece == 'n':
@@ -105,78 +105,95 @@ class ChessRules:
 
 		elif from_piece == 'q':
 			if (from_row == to_row or from_col == to_col) and (to_piece == '0' or to_piece.isupper()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 			elif abs(to_row - from_row) == abs(to_col - from_col) and (to_piece == '0' or to_piece.isupper()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 		elif from_piece == 'Q':
 			if (from_row == to_row or from_col) == to_col and (to_piece == '0' or to_piece.islower()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 			elif abs(to_row - from_row) == abs(to_col - from_col) and (to_piece == '0' or to_piece.islower()):
-				if self.is_clear_path(from_row, from_col, to_row, to_col, board):
+				if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
 					return True
 
 		elif from_piece == 'k':
 			if abs(from_row-to_row) <=1 and abs(from_col-to_col) <=1 and (to_piece == '0' or to_piece.isupper()):
 				return True
+			elif board.black_castleK and (to_col == 7 and to_row == 0) and \
+				self.is_clear_path(from_row, from_col, to_row, to_col, board.board) and not self.is_check(board, player):
+				return True
+			elif board.black_castleQ and (to_col == 0 and to_row == 0) and \
+				self.is_clear_path(from_row, from_col, to_row, to_col, board.board) and not self.is_check(board, player):
+				return True
+
 		elif from_piece == 'K':
 			if abs(from_row-to_row) <=1 and abs(from_col-to_col) <=1 and (to_piece == '0' or to_piece.islower()):
 				return True
+			elif board.white_castleK and (to_col == 7 and to_row == 7) and \
+				self.is_clear_path(from_row, from_col, to_row, to_col, board.board) and not self.is_check(board, player):
+				return True
+			elif board.white_castleQ and (to_col == 0 and to_row == 7) and \
+				self.is_clear_path(from_row, from_col, to_row, to_col, board.board) and not self.is_check(board, player):
+				return True
+
+		elif self.is_check(board, player):
+			return False
+		elif from_square == to_square:
+			return False
 
 		return False
 
-	def is_check(self, board, player):
-		# First find player's king square, white then black
+	def is_check(self, board, color):
+		"""
+		takes board object as arg
+		"""
+		if color == 'White':
+			king_piece = 'K'
+		else:
+			king_piece = 'k'
+		# find player's king square
 		for i in range(8):
-			for j in range(8):
-				if board[i][j] == 'K':
-					king_square = (i, j)
-					break
-		for i in range(8):
-			for j in range(8):
-				if board[i][j] == 'k':
-					king_square = (i, j)
-					break
-		# search through all pieces to find any valid moves	
-		for i in range(8):
-			for j in range(8):
-				if board[i][j]:
-					if board[i][j].isupper():
-						if self.is_valid_move((i, j), king_square, board, 'White'):
-							return True
-		for i in range(8):
-			for j in range(8):
-				if board[i][j]:
-					if board[i][j].islower():
-						if self.is_valid_move((i, j), king_square, board, 'Black'):
-							return True	
-
-	def is_checkmate(self, board, player):
-		all_valid_moves = []
-		if player == 'White':
+				for j in range(8):
+					if board.board[i][j] == king_piece:
+						king_square = (i, j)
+						break
+		if color == 'White':
 			for i in range(8):
 				for j in range(8):
-					if board[i][j].islower():
-						all_valid_moves.extend(self.list_valid_moves((i,j), board, player))
-		elif player == 'Black':
+						if board.board[i][j].islower():
+							if self.is_valid_move((i, j), king_square, board, 'Black'):
+								return True	
+		elif color == 'Black':
 			for i in range(8):
 				for j in range(8):
-					if board[i][j].isupper():
-						all_valid_moves.extend(self.list_valid_moves((i,j), board, player))
-		if len(all_valid_moves) == 0:
-			return True
+						if board.board[i][j].isupper():
+							if self.is_valid_move((i, j), king_square, board, 'White'):
+								return True
 		else:
 			return False
 
-	def list_valid_moves(self, from_square, board, player):
-		#returns a list of moves as tuples in tuples
+	def is_checkmate(self, board, color):
+		possible_moves = self.get_all_possible_moves(board, color)
+		for move in possible_moves:
+			testboard = board.get_testboard(move[0], move[1], board)
+			if not self.is_check(testboard, color):
+				return False
+		return True
+
+
+
+	def list_valid_moves(self, from_square, board, color):
+		#returns a list of moves as tuples within tuples
 		valid_moves = []
 		for i in range(8):
 			for j in range(8):
-				if self.is_valid_move(from_square, (i,j), board, player):
-					valid_moves.append((from_square, (i, j)))
+				if self.is_valid_move(from_square, (i,j), board, color):
+
+					to_piece = board.board[i][j]
+					if not to_piece in {'k', 'K'}:
+						valid_moves.append((from_square, (i, j)))
 		return valid_moves
 
 	def get_all_possible_moves(self, board, color):
@@ -184,13 +201,13 @@ class ChessRules:
 		if color == 'White':
 			for i in range(8):
 				for j in range(8):
-					if board[i][j].isupper():
-						moves.extend(self.rules.list_valid_moves((i,j), board, color))
+					if board.board[i][j].isupper():
+						moves.extend(self.list_valid_moves((i,j), board, color))
 		if color == 'Black':
 			for i in range(8):
 				for j in range(8):
-					if board[i][j].islower():
-						moves.extend(self.rules.list_valid_moves((i,j), board, color))
+					if board.board[i][j].islower():
+						moves.extend(self.list_valid_moves((i,j), board, color))
 		return moves
 
 # if __name__ == '__main__':
@@ -219,6 +236,3 @@ class ChessRules:
 # 				player = 'White'
 # 		else:
 # 			print("Invalid move please try again")
-
-
-
