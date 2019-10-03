@@ -38,7 +38,7 @@ class App:
         self.surface = pygame.Surface((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.square_size = SQUARE_SIZE
-        self.caption = pygame.display.set_caption('MyChess by Caff v1.0')
+        self.caption = pygame.display.set_caption('PyChess by Caff v1.0')
         self.background = pygame.image.load(os.path.join(DATA_PATH, 'chessboard.png'))
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
