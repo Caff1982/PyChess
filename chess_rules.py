@@ -4,10 +4,12 @@ class ChessRules:
     """
     Class containing main rules for chess.
 
-    Used to make sure moves are valid, also for check and checkmate.
+    Used to make sure moves are valid, also for check, checkmate and list
+    valid moves.
     """
 
     def is_clear_path(self, from_row, from_col, to_row, to_col, board):
+
         # Base case, if only moving one square path is clear
         if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1:
             return True
@@ -36,8 +38,7 @@ class ChessRules:
         if board[from_row][from_col] != '0':
             return False
         else:
-            return self.is_clear_path(from_row, from_col,
-                                      to_row, to_col, board)
+            return self.is_clear_path(from_row, from_col, to_row, to_col, board)
 
     def is_valid_move(self, from_square, to_square, board, player):
         from_row = from_square[0]
@@ -50,6 +51,8 @@ class ChessRules:
         if player == 'White' and from_piece.islower():
             return False
         elif player == 'Black' and from_piece.isupper():
+            return False
+        elif from_square == to_square:
             return False
 
         elif from_piece == 'P':
@@ -64,7 +67,7 @@ class ChessRules:
                     return True
             # move diagonally to take
             elif to_row == from_row-1 and (to_col == from_col+1 or to_col == from_col-1) \
-                    and to_piece.islower():
+                                      and to_piece.islower():
                 return True
 
         elif from_piece == 'p':
@@ -72,11 +75,10 @@ class ChessRules:
                 return True
             elif to_row == from_row+2 and to_col == from_col and \
                     to_piece == '0' and from_row == 1:
-                if self.is_clear_path(from_row, from_col,
-                                      to_row, to_col, board.board):
+                if self.is_clear_path(from_row, from_col, to_row, to_col, board.board):
                     return True
             elif to_row == from_row+1 and (to_col == from_col+1 or to_col == from_col-1) \
-                    and to_piece.isupper():
+                                      and to_piece.isupper():
                 return True
 
         elif from_piece == 'R':
@@ -184,9 +186,6 @@ class ChessRules:
                     and not self.is_check(board, player):
                 return True
 
-        elif from_square == to_square:
-            return False
-
         return False
 
     def is_check(self, board, color):
@@ -203,6 +202,7 @@ class ChessRules:
                 if board.board[i][j] == king_piece:
                     king_square = (i, j)
                     break
+        # Search for pieces which could attack the King
         if color == 'White':
             for i in range(8):
                 for j in range(8):
@@ -236,7 +236,6 @@ class ChessRules:
         for i in range(8):
             for j in range(8):
                 if self.is_valid_move(from_square, (i, j), board, color):
-
                     to_piece = board.board[i][j]
                     if to_piece not in {'k', 'K'}:
                         valid_moves.append((from_square, (i, j)))

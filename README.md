@@ -1,6 +1,6 @@
 # PyChess
 
-A chess game written in Python with AI. Uses mini-max algorithm with alpha-beta pruning to get best move. Can play human vs human or human vs AI.
+A chess game written in Python with AI. Uses mini-max algorithm with alpha-beta pruning to get best move. Can play as human vs human or human vs AI.
 
 ## Prerequisites and Installing
 
@@ -19,14 +19,11 @@ python main.py
 ```
 ## Description
 
-This program uses a mini-max algorithm to search for the best move. It also used alpha-beta pruning to get the optimal move quicker.
+The default search depth for the AI is 3 (Medium difficulty). This can be adjusted on the start menu although increasing the search depth will take longer to get the best move. The game can be played against AI or human using the start menu to select.
 
-For the evaluation function the AI uses piece values and also piece-tables for heuristics. This helps the performance and also makes the AI play more 'human'.
+The AI uses a mini-max algorithm to search for the best move. It also uses alpha-beta pruning to get the optimal move quicker. 
 
-
-## Usage
-
-The default search depth is 3 (Medium difficulty). This can be adjusted on the start menu although increasing the search depth will take longer to get the best move. The game can be played against AI or human using the start menu to select.
+For the evaluation function the AI uses piece values and also piece-tables. This improves the performance and also makes the AI play more 'human'.
 
 ## Todo
 

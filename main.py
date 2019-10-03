@@ -21,7 +21,6 @@ HEIGHT = 800
 
 SQUARE_SIZE = WIDTH//8
 
-
 pygame.init()
 
 
@@ -39,7 +38,7 @@ class App:
         self.surface = pygame.Surface((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.square_size = SQUARE_SIZE
-        self.caption = pygame.display.set_caption('MyChess by Caff')
+        self.caption = pygame.display.set_caption('MyChess by Caff v1.0')
         self.background = pygame.image.load(os.path.join(DATA_PATH, 'chessboard.png'))
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
@@ -60,14 +59,16 @@ class App:
         self.to_piece = None
 
     def load_pieces(self):
-        # load piece images from 'pieces' directory
+        """
+        Loads piece images as class attributes
+        """
         for piece in os.listdir(os.path.join(DATA_PATH, 'pieces')):
             piece_image = pygame.image.load(os.path.join(DATA_PATH + 'pieces/', piece))
             setattr(self, piece[0], piece_image)
 
     def update_board(self):
         self.screen.blit(self.background, [0, 0])
-        # set the buffersize for each square
+        # b is the buffersize for each square
         b = self.square_size//4
         for col in range(8):
             for row in range(8):
@@ -84,7 +85,6 @@ class App:
 
         if x + width > mouse[0] > x and y + height > mouse[1] > y:
             pygame.draw.rect(self.screen, active_clr, (x, y, width, height))
-            # we pass the action as an arg and then call below using()
             if click[0] == 1 and action is not None:
                 action()
                 pygame.draw.rect(self.screen, BLACK, (x, y, width, height))
@@ -160,7 +160,7 @@ class App:
         self.button('Human vs AI', 200, 350, 180, 50, WHITE, GREEN, self.set_2player)
         self.button('Human vs Human', 420, 350, 180, 50, WHITE, GREEN, self.set_2player)
         self.button('Press Spacebar to Start', 200, 450, 400, 50, WHITE, WHITE)
-        self.button('Default play mode is Player vs AI.', 
+        self.button('Default play mode is Human vs AI.', 
                      100, 650, 600, 50, GRAY, GRAY)
         self.button('Default difficulty is Medium. Playing in Hard difficulty will take longer.',
                      100, 700, 600, 50, GRAY, GRAY)
