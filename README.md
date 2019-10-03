@@ -1,6 +1,6 @@
 # PyChess
 
-A chess game written in Python with AI. Uses mini-max algorithm with alpha-beta pruning to get best move. Can play as human vs human or human vs AI.
+A chess game written in Python with AI. It uses mini-max algorithm with alpha-beta pruning to get best move. Can be  played as human vs human or human vs AI.
 
 ## Prerequisites and Installing
 
