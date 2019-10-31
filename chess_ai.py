@@ -27,14 +27,14 @@ class ChessAI:
         best_move = -99999
         best_move_final = None
         for move in self.get_possible_moves(board, 'Black'):
-            testboard = board.get_testboard(move[0], move[1], board)
+            testboard = board.get_testboard(move[0], move[1])
  
             value = max(best_move, self.minimax(testboard, float('-inf'), float('inf'),
                                                 not is_maximizing, depth-1))
             if value > best_move:
                 if not self.rules.is_check(testboard, 'Black'):
-                    print('Best score', best_move)
-                    print('Best move:', best_move_final)
+                    # print('Best score', best_move)
+                    # print('Best move:', best_move_final)
                     best_move = value
                     best_move_final = move
 
@@ -55,7 +55,7 @@ class ChessAI:
         if is_maximizing:
             best_move = -99999
             for move in moves:
-                testboard = board.get_testboard(move[0], move[1], board)
+                testboard = board.get_testboard(move[0], move[1])
                 best_move = max(best_move, self.minimax(testboard, alpha, beta,
                                                         is_maximizing, depth-1))
                 alpha = max(alpha, best_move)
@@ -65,7 +65,7 @@ class ChessAI:
         else:
             best_move = 99999
             for move in moves:
-                testboard = board.get_testboard(move[0], move[1], board)
+                testboard = board.get_testboard(move[0], move[1])
                 best_move = min(best_move, self.minimax(testboard, alpha, beta,
                                                         not is_maximizing, depth-1))
                 beta = min(beta, best_move)

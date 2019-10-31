@@ -164,11 +164,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.isupper()):
                 return True
-            elif board.black_castleK and (to_col == 7 and to_row == 0) and \
+            elif board.black_castleK and from_square == (0, 4) and (to_col == 7 and to_row == 0) and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.black_castleQ and (to_col == 0 and to_row == 0) and \
+            elif board.black_castleQ and from_square == (0, 4) and (to_col == 0 and to_row == 0) and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
@@ -177,11 +177,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.islower()):
                 return True
-            elif board.white_castleK and (to_col == 7 and to_row == 7) and \
+            elif board.white_castleK and from_square == (7, 4) and (to_col == 7 and to_row == 7) and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.white_castleQ and (to_col == 0 and to_row == 7) and \
+            elif board.white_castleQ and from_square == (7, 4) and (to_col == 0 and to_row == 7) and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
@@ -223,10 +223,16 @@ class ChessRules:
     def is_checkmate(self, board, color):
         possible_moves = self.get_all_possible_moves(board, color)
         for move in possible_moves:
-            testboard = board.get_testboard(move[0], move[1], board)
+            testboard = board.get_testboard(move[0], move[1])
             if not self.is_check(testboard, color):
                 return False
         return True
+
+    def is_stalemate(self, board, color):
+        if len(self.get_all_possible_moves(board, color)) == 0:
+            return True
+        else:
+            return False
 
     def list_valid_moves(self, from_square, board, color):
         """
@@ -236,9 +242,11 @@ class ChessRules:
         for i in range(8):
             for j in range(8):
                 if self.is_valid_move(from_square, (i, j), board, color):
-                    to_piece = board.board[i][j]
-                    if to_piece not in {'k', 'K'}:
-                        valid_moves.append((from_square, (i, j)))
+                    testboard = board.get_testboard(from_square, (i, j))
+                    if not self.is_check(testboard, color):
+                        to_piece = board.board[i][j]
+                        if to_piece not in {'k', 'K'}:
+                            valid_moves.append((from_square, (i, j)))
         return valid_moves
 
     def get_all_possible_moves(self, board, color):

@@ -32,13 +32,13 @@ class Board:
         for i, row in enumerate(self.board):
             print(i, row)
 
-    def get_testboard(self, from_square, to_square, board):
-        testboard = copy.deepcopy(board)
+    def get_testboard(self, from_square, to_square):
+        testboard = copy.deepcopy(self)
         from_row = from_square[0]
         from_col = from_square[1]
         to_row = to_square[0]
         to_col = to_square[1]
-        piece = board.board[from_row][from_col]
+        piece = self.board[from_row][from_col]
         testboard.board[from_row][from_col] = '0'
         testboard.board[to_row][to_col] = piece
         return testboard

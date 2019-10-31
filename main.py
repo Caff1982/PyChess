@@ -8,6 +8,8 @@ from chess_rules import ChessRules
 from chess_ai import ChessAI
 from player import Player
 
+from tests import *
+
 GRAY = (50,50,50)
 GREEN = (0,255,0)
 BLACK = (0,0,0)
@@ -52,7 +54,7 @@ class App:
         self.two_player = False
         self.ai = ChessAI()
 
-        self.board = Board()
+        self.board = Board(white_wins_one_move)
         self.load_pieces()
         self.update_board()
         self.from_piece = None
@@ -140,7 +142,7 @@ class App:
                 self.end_events()
             else:
                 self.running = False
-            self.clock.tick(60)
+            self.clock.tick(30)
         pygame.quit()
         sys.exit()
 
@@ -167,6 +169,23 @@ class App:
         self.button('For more information please view the README file.', 
                      100, 750, 600, 50, GRAY, GRAY)
         pygame.display.update()
+
+    def update_game_state(self):
+        if self.color == 'White':
+            self.color = 'Black'
+        else:
+            self.color = 'White'
+        # Now see if there is check or checkmate
+        if self.rules.is_check(self.board, self.color):
+            if self.rules.is_checkmate(self.board, self.color):
+                self.state = 'gameover'
+            else:
+                self.button(f'{self.color} in check!',
+                            200, 375, 300, 50, WHITE, WHITE)
+                pygame.display.update()
+                time.sleep(1)
+        elif self.rules.is_stalemate(self.board, self.color):
+            self.state = 'gameover'
 
     def playing_events(self):
         for event in pygame.event.get():
@@ -197,7 +216,7 @@ class App:
                 self.from_piece = None
                 self.to_piece = None
                 # make sure move does not put player in check
-                testboard = self.board.get_testboard(from_square, to_square, self.board)
+                testboard = self.board.get_testboard(from_square, to_square)
                 if self.rules.is_check(testboard, self.color):
                     self.button(f'Invalid move, {self.color} in check!',
                                 200, 375, 300, 50, WHITE, WHITE)
@@ -212,28 +231,28 @@ class App:
                     time.sleep(1.5)
                 else:
                     self.board.move_piece(from_square, to_square)
-                    if self.color == 'White':
-                        self.color = 'Black'
-                    else:
-                        self.color = 'White'
-                    # Now see if there is check or checkmate
-                    if self.rules.is_check(self.board, self.color):
-                        if self.rules.is_checkmate(self.board, self.color):
-                            self.state = 'gameover'
-                        self.button(f'{self.color} in check!',
-                                    200, 375, 300, 50, WHITE, WHITE)
-                        pygame.display.update()
-                        time.sleep(1)
+                    self.update_game_state()
+
+                    
 
             elif self.color == 'Black' and not self.two_player:
                 AI_move = self.ai.get_best_move(self.board, True, 3)
+                print(AI_move)
                 self.board.move_piece(AI_move[0], AI_move[1])
                 self.board.print_board()
-                self.color = 'White'
+                self.update_game_state()
                 
-    def end_events(self):
-        self.button(f'Game Over! {self.color} wins', 200, 375, 400, 50,
-                    WHITE, GREEN, self.start_game)
+    def end_events(self):                   
+        if self.rules.is_check(self.board, self.color):
+            if self.color == 'White':
+                self.color = 'Black'
+            else:
+                self.color = 'White'
+            self.button(f'Game Over! {self.color} wins', 200, 375, 400, 50,
+                        WHITE, GREEN, self.start_game)
+        else:
+            self.button(f'Game Over! Stalemate', 200, 375, 400, 50,
+                        WHITE, GREEN, self.start_game)
         pygame.display.update()
         time.sleep(3)
         self.board = Board()
