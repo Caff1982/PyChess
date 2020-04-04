@@ -27,7 +27,7 @@ For the evaluation function the AI uses piece values and also piece-tables. This
 
 ## Todo
 
-En passant, 50 move rule.
+En passant, 50 move rule, make AI able to play as white.
 
 ## Contributing
 

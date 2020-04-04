@@ -9,7 +9,6 @@ class ChessRules:
     """
 
     def is_clear_path(self, from_row, from_col, to_row, to_col, board):
-
         # Base case, if only moving one square path is clear
         if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1:
             return True
@@ -35,24 +34,24 @@ class ChessRules:
                 from_row -= 1
                 from_col += 1
 
-        if board[from_row][from_col] != '0':
+        if board[from_row * 8 + from_col] != '0':
             return False
         else:
             return self.is_clear_path(from_row, from_col, to_row, to_col, board)
 
-    def is_valid_move(self, from_square, to_square, board, player):
-        from_row = from_square[0]
-        from_col = from_square[1]
-        to_row = to_square[0]
-        to_col = to_square[1]
-        from_piece = board.board[from_row][from_col]
-        to_piece = board.board[to_row][to_col]
+    def is_valid_move(self, from_idx, to_idx, board, player):
+        from_row = from_idx // 8
+        from_col = from_idx % 8
+        to_row = to_idx // 8
+        to_col = to_idx % 8
+        from_piece = board.board[from_idx]
+        to_piece = board.board[to_idx]
 
         if player == 'White' and from_piece.islower():
             return False
         elif player == 'Black' and from_piece.isupper():
             return False
-        elif from_square == to_square:
+        elif from_idx == to_idx:
             return False
 
         elif from_piece == 'P':
@@ -164,11 +163,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.isupper()):
                 return True
-            elif board.black_castleK and from_square == (0, 4) and (to_col == 7 and to_row == 0) and \
+            elif board.black_castleK and from_idx == 4 and to_idx == 7 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.black_castleQ and from_square == (0, 4) and (to_col == 0 and to_row == 0) and \
+            elif board.black_castleQ and from_idx == 4 and to_idx == 0 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
@@ -177,11 +176,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.islower()):
                 return True
-            elif board.white_castleK and from_square == (7, 4) and (to_col == 7 and to_row == 7) and \
+            elif board.white_castleK and from_idx == 60 and to_idx == 63 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.white_castleQ and from_square == (7, 4) and (to_col == 0 and to_row == 7) and \
+            elif board.white_castleQ and from_idx == 60 and to_idx == 56 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
@@ -192,38 +191,28 @@ class ChessRules:
         """
         Takes board object and color as args and returns True/False
         """
-        if color == 'White':
-            king_piece = 'K'
-        else:
-            king_piece = 'k'
-        # find player's king square
-        for i in range(8):
-            for j in range(8):
-                if board.board[i][j] == king_piece:
-                    king_square = (i, j)
-                    break
         # Search for pieces which could attack the King
         if color == 'White':
-            for i in range(8):
-                for j in range(8):
-                    if board.board[i][j].islower():
-                        if self.is_valid_move((i, j), king_square,
-                                               board, 'Black'):
+            king_idx = board.board.index('K')
+            for idx in range(64):
+                if board.board[idx].islower():
+                    if self.is_valid_move(idx, king_idx,
+                                          board, 'Black'):
                             return True
         elif color == 'Black':
-            for i in range(8):
-                for j in range(8):
-                    if board.board[i][j].isupper():
-                        if self.is_valid_move((i, j), king_square,
-                                               board, 'White'):
+            king_idx = board.board.index('k')
+            for idx in range(64):
+                if board.board[idx].isupper():
+                    if self.is_valid_move(idx, king_idx,
+                                          board, 'White'):
                             return True
         else:
             return False
 
     def is_checkmate(self, board, color):
         possible_moves = self.get_all_possible_moves(board, color)
-        for move in possible_moves:
-            testboard = board.get_testboard(move[0], move[1])
+        for from_idx, to_idx in possible_moves:
+            testboard = board.get_testboard(from_idx, to_idx)
             if not self.is_check(testboard, color):
                 return False
         return True
@@ -234,31 +223,28 @@ class ChessRules:
         else:
             return False
 
-    def list_valid_moves(self, from_square, board, color):
+    def list_valid_moves(self, from_idx, board, color):
         """
         Returns a list of moves as list of tuples within tuples
         """
         valid_moves = []
-        for i in range(8):
-            for j in range(8):
-                if self.is_valid_move(from_square, (i, j), board, color):
-                    testboard = board.get_testboard(from_square, (i, j))
-                    if not self.is_check(testboard, color):
-                        to_piece = board.board[i][j]
-                        if to_piece not in {'k', 'K'}:
-                            valid_moves.append((from_square, (i, j)))
+        for idx in range(64):
+            if self.is_valid_move(from_idx, idx, board, color):
+                testboard = board.get_testboard(from_idx, idx)
+                if not self.is_check(testboard, color):
+                    to_piece = board.board[idx]
+                    if to_piece not in {'k', 'K'}:
+                        valid_moves.append((from_idx, idx))
         return valid_moves
 
     def get_all_possible_moves(self, board, color):
         moves = []
         if color == 'White':
-            for i in range(8):
-                for j in range(8):
-                    if board.board[i][j].isupper():
-                        moves.extend(self.list_valid_moves((i, j), board, color))
-        if color == 'Black':
-            for i in range(8):
-                for j in range(8):
-                    if board.board[i][j].islower():
-                        moves.extend(self.list_valid_moves((i, j), board, color))
+            for idx in range(64):
+                if board.board[idx].isupper():
+                    moves.extend(self.list_valid_moves(idx, board, color))
+        elif color == 'Black':
+            for idx in range(64):
+                if board.board[idx].islower():
+                    moves.extend(self.list_valid_moves(idx, board, color))
         return moves

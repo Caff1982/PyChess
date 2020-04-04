@@ -8,13 +8,11 @@ from chess_rules import ChessRules
 from chess_ai import ChessAI
 from player import Player
 
-from tests import *
 
-GRAY = (50,50,50)
-GREEN = (0,255,0)
+LIGHT_GRAY = (150,150,150)
+DARK_GRAY = (90,90,90)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
-
 
 DATA_PATH = 'data/'
 
@@ -40,7 +38,7 @@ class App:
         self.surface = pygame.Surface((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.square_size = SQUARE_SIZE
-        self.caption = pygame.display.set_caption('PyChess by Caff v1.0')
+        self.caption = pygame.display.set_caption('PyChess by Caff')
         self.background = pygame.image.load(os.path.join(DATA_PATH, 'chessboard.png'))
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
@@ -49,12 +47,13 @@ class App:
         self.color = 'White'
 
         self.rules = ChessRules()
-        # set human vs AI as default option
+        # TODO: Make AI able to play as white
         self.player1 = Player()
         self.two_player = False
         self.ai = ChessAI()
+        self.depth = 3
 
-        self.board = Board(white_wins_one_move)
+        self.board = Board()
         self.load_pieces()
         self.update_board()
         self.from_piece = None
@@ -62,11 +61,18 @@ class App:
 
     def load_pieces(self):
         """
-        Loads piece images as class attributes
+        Loads piece images and sets them as class attributes.
         """
         for piece in os.listdir(os.path.join(DATA_PATH, 'pieces')):
             piece_image = pygame.image.load(os.path.join(DATA_PATH + 'pieces/', piece))
             setattr(self, piece[0], piece_image)
+
+    def print_move(self, a, b):
+        """
+        Prints move in terminal.
+        format: (row, column)
+        """
+        print(f'Moved from: ({a//8},{a%8}) to: ({b//8},{b%8})')
 
     def update_board(self):
         self.screen.blit(self.background, [0, 0])
@@ -74,14 +80,18 @@ class App:
         b = self.square_size//4
         for col in range(8):
             for row in range(8):
-                if self.board.board[col][row].isalpha():
-                    piece = getattr(self, self.board.board[col][row])
+                idx = col * 8 + row
+                if self.board.board[idx].isalpha():
+                    piece = getattr(self, self.board.board[idx])
                     self.screen.blit(piece, (row*self.square_size+b,
                                              col*self.square_size+b))
         pygame.display.update()
 
     def button(self, msg, x, y, width, height,
                inactive_clr, active_clr, action=None):
+        """
+        Helper function for creating simple buttons
+        """
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
 
@@ -90,7 +100,6 @@ class App:
             if click[0] == 1 and action is not None:
                 action()
                 pygame.draw.rect(self.screen, BLACK, (x, y, width, height))
-
         else:
             pygame.draw.rect(self.screen, inactive_clr, (x, y, width, height))
 
@@ -101,6 +110,9 @@ class App:
 
     def difficulty_button(self, msg, x, y, width, height,
                           inactive_clr, active_clr, depth):
+        """
+        Button used for setting difficulty/depth
+        """
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         if x + width > mouse[0] > x and y + height > mouse[1] > y:
@@ -108,7 +120,6 @@ class App:
             if click[0] == 1:
                 self.depth = depth
                 pygame.draw.rect(self.screen, BLACK, (x, y, width, height))
-
         else:
             pygame.draw.rect(self.screen, inactive_clr, (x, y, width, height))
 
@@ -121,16 +132,16 @@ class App:
         textSurface = font.render(text, True, BLACK)
         return textSurface, textSurface.get_rect()
 
-    def start_game(self):
-        self.state = 'playing'
-
-    def set_2player(self):
+    def start_2player(self):
         self.two_player = True
 
     def stop_2player(self):
         self.two_player = False
 
     def run(self):
+        """
+        Main loop used to control game state
+        """
         while self.running:
             if self.state == 'start':
                 self.start_events()
@@ -142,7 +153,7 @@ class App:
                 self.end_events()
             else:
                 self.running = False
-            self.clock.tick(30)
+            self.clock.tick(60)
         pygame.quit()
         sys.exit()
 
@@ -150,32 +161,36 @@ class App:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 self.state = 'playing'
 
     def start_draw(self):
-        self.screen.fill(GRAY)
-        self.difficulty_button('Easy', 200, 250, 90, 50, WHITE, GREEN, 2)
-        self.difficulty_button('Medium', 355, 250, 90, 50, WHITE, GREEN, 3)
-        self.difficulty_button('Hard', 510, 250, 90, 50, WHITE, GREEN, 4)
-        self.button('Human vs AI', 200, 350, 180, 50, WHITE, GREEN, self.set_2player)
-        self.button('Human vs Human', 420, 350, 180, 50, WHITE, GREEN, self.set_2player)
+        self.screen.fill(LIGHT_GRAY)
+        self.difficulty_button('Easy', 200, 250, 90, 50, WHITE, DARK_GRAY, 2)
+        self.difficulty_button('Medium', 355, 250, 90, 50, WHITE, DARK_GRAY, 3)
+        self.difficulty_button('Hard', 510, 250, 90, 50, WHITE, DARK_GRAY, 4)
+        self.button('Human vs AI', 200, 350, 180, 50, WHITE, DARK_GRAY, self.stop_2player)
+        self.button('Human vs Human', 420, 350, 180, 50, WHITE, DARK_GRAY, self.start_2player)
         self.button('Press Spacebar to Start', 200, 450, 400, 50, WHITE, WHITE)
         self.button('Default play mode is Human vs AI.', 
-                     100, 650, 600, 50, GRAY, GRAY)
+                     100, 650, 600, 50, LIGHT_GRAY, LIGHT_GRAY)
         self.button('Default difficulty is Medium. Playing in Hard difficulty will take longer.',
-                     100, 700, 600, 50, GRAY, GRAY)
+                     100, 700, 600, 50, LIGHT_GRAY, LIGHT_GRAY)
         self.button('For more information please view the README file.', 
-                     100, 750, 600, 50, GRAY, GRAY)
+                     100, 750, 600, 50, LIGHT_GRAY, LIGHT_GRAY)
         pygame.display.update()
 
     def update_game_state(self):
+        """
+        Used to update state after each move.
+        Changes player and looks for check, checkmate,
+        stalemate.
+        """
         if self.color == 'White':
             self.color = 'Black'
         else:
             self.color = 'White'
-        # Now see if there is check or checkmate
+
         if self.rules.is_check(self.board, self.color):
             if self.rules.is_checkmate(self.board, self.color):
                 self.state = 'gameover'
@@ -195,14 +210,14 @@ class App:
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.from_piece is None:
                     from_x, from_y = pygame.mouse.get_pos()
-                    self.from_piece = (from_x, from_y)
+                    self.from_piece = (from_y//self.square_size, from_x//self.square_size)
                 else:
                     to_x, to_y = pygame.mouse.get_pos()
-                    self.to_piece = (to_x, to_y)
+                    self.to_piece = (to_y//self.square_size, to_x//self.square_size)
 
             if self.from_piece:
-                row, col = [i//self.square_size for i in self.from_piece[::-1]]
-                piece = self.board.board[row][col]
+                idx = self.from_piece[0] * 8 + self.from_piece[1]
+                piece = self.board.board[idx]
                 if piece is not '0':
                     sprite = getattr(self, piece)
                     x, y = pygame.mouse.get_pos()
@@ -210,35 +225,43 @@ class App:
                     pygame.display.update()
 
             if self.from_piece and self.to_piece:
-                # Change from pixel values to board values
-                from_square = [i//self.square_size for i in self.from_piece[::-1]]
-                to_square = [i//self.square_size for i in self.to_piece[::-1]]
+                # Convert pixel values to board values
+                from_idx = self.from_piece[0] * 8 + self.from_piece[1]
+                to_idx = self.to_piece[0] * 8 + self.to_piece[1]
                 self.from_piece = None
                 self.to_piece = None
-                # make sure move does not put player in check
-                testboard = self.board.get_testboard(from_square, to_square)
-                if self.rules.is_check(testboard, self.color):
-                    self.button(f'Invalid move, {self.color} in check!',
-                                200, 375, 300, 50, WHITE, WHITE)
-                    pygame.display.update()
-                    time.sleep(2)
-                # make sure move is valid before moving pieces
-                elif not self.rules.is_valid_move(from_square, to_square,
+                
+                testboard = self.board.get_testboard(from_idx, to_idx)
+                
+                # Make sure move is valid before moving pieces
+                if not self.rules.is_valid_move(from_idx, to_idx,
                                                   self.board, self.color):
                     self.button(f'That is not a valid move.',
                                 200, 375, 300, 50, WHITE, WHITE)
                     pygame.display.update()
                     time.sleep(1.5)
+                # Make sure move does not put player in check
+                elif self.rules.is_check(testboard, self.color):
+                    self.button(f'Invalid move, {self.color} in check!',
+                                200, 375, 300, 50, WHITE, WHITE)
+                    pygame.display.update()
+                    time.sleep(2)
                 else:
-                    self.board.move_piece(from_square, to_square)
+                    # Move piece
+                    self.board.move_piece(from_idx, to_idx)
+                    self.print_move(from_idx, to_idx)
                     self.update_game_state()
+                    self.update_board()
+                    self.board.print_board()
 
-                    
-
-            elif self.color == 'Black' and not self.two_player:
-                AI_move = self.ai.get_best_move(self.board, True, 3)
-                print(AI_move)
-                self.board.move_piece(AI_move[0], AI_move[1])
+            if self.color == 'Black' and not self.two_player:
+                start = time.perf_counter()
+                print('\nGenerating AI move...')
+                from_idx, to_idx = self.ai.get_best_move(self.board, True, self.depth)
+                end = time.perf_counter()
+                print(f'Took {round(end-start, 2)}secs to generate AI move')
+                self.print_move(from_idx, to_idx)
+                self.board.move_piece(from_idx, to_idx)
                 self.board.print_board()
                 self.update_game_state()
                 
@@ -248,11 +271,11 @@ class App:
                 self.color = 'Black'
             else:
                 self.color = 'White'
-            self.button(f'Game Over! {self.color} wins', 200, 375, 400, 50,
-                        WHITE, GREEN, self.start_game)
+            self.button(f'Checkmate! {self.color} wins', 200, 375, 400, 50,
+                        WHITE, LIGHT_GRAY)
         else:
             self.button(f'Game Over! Stalemate', 200, 375, 400, 50,
-                        WHITE, GREEN, self.start_game)
+                        WHITE, LIGHT_GRAY)
         pygame.display.update()
         time.sleep(3)
         self.board = Board()
