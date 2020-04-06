@@ -65,7 +65,7 @@ class Board:
             self.board[4] = '0'
             self.board[5] = 'r'
             self.board[6] = 'k'
-            self.board[6] = '0'
+            self.board[7] = '0'
         elif piece == 'K' and to_idx == 56:
             self.white_castleQ = False
             self.board[56] = '0'

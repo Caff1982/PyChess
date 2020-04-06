@@ -23,7 +23,7 @@ The default search depth for the AI is 3 (Medium difficulty). This can be adjust
 
 The AI uses a mini-max algorithm to search for the best move. It also uses alpha-beta pruning to get the optimal move quicker. 
 
-For the evaluation function the AI uses piece values and also piece-tables. This improves the performance and also makes the AI play more 'human'.
+For the evaluation function the AI uses piece values and also piece-tables. This improves the performance and also makes the AI play more human.
 
 ## Todo
 
