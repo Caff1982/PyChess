@@ -23,15 +23,6 @@ SQUARE_SIZE = WIDTH//8
 
 pygame.init()
 
-white_wins_one_move =   ['r', '0', '0', '0', 'R', '0', '0', '0'] + \
-                        ['p', '0', '0', 'k', '0', '0', 'p', '0'] + \
-                        ['0', '0', 'p', 'B', '0', '0', '0', '0'] + \
-                        ['0', 'p', 'P', '0', '0', '0', '0', '0'] + \
-                        ['0', '0', 'B', '0', 'R', 'p', 'b', '0'] + \
-                        ['0', '0', '0', '0', '0', '0', '0', '0'] + \
-                        ['P', 'P', 'P', 'K', '0', 'P', 'P', 'P'] + \
-                        ['0', '0', '0', '0', '0', '0', '0', '0']
-
 
 class App:
     """
@@ -62,7 +53,7 @@ class App:
         self.ai = ChessAI()
         self.depth = 3
 
-        self.board = Board(white_wins_one_move)
+        self.board = Board()
         self.load_pieces()
         self.update_board()
         self.from_piece = None
