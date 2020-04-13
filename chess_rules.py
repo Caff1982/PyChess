@@ -163,11 +163,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.isupper()):
                 return True
-            elif board.black_castleK and from_idx == 4 and to_idx == 7 and \
+            elif board.black_can_castle and from_idx == 4 and to_idx == 7 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.black_castleQ and from_idx == 4 and to_idx == 0 and \
+            elif board.black_can_castle and from_idx == 4 and to_idx == 0 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
@@ -176,11 +176,11 @@ class ChessRules:
             if abs(from_row-to_row) <= 1 and abs(from_col-to_col) <= 1 and \
                     (to_piece == '0' or to_piece.islower()):
                 return True
-            elif board.white_castleK and from_idx == 60 and to_idx == 63 and \
+            elif board.white_can_castle and from_idx == 60 and to_idx == 63 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True
-            elif board.white_castleQ and from_idx == 60 and to_idx == 56 and \
+            elif board.white_can_castle and from_idx == 60 and to_idx == 56 and \
                 self.is_clear_path(from_row, from_col, to_row, to_col, board.board) \
                     and not self.is_check(board, player):
                 return True

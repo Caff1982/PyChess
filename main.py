@@ -23,6 +23,15 @@ SQUARE_SIZE = WIDTH//8
 
 pygame.init()
 
+white_wins_one_move =   ['r', '0', '0', '0', 'R', '0', '0', '0'] + \
+                        ['p', '0', '0', 'k', '0', '0', 'p', '0'] + \
+                        ['0', '0', 'p', 'B', '0', '0', '0', '0'] + \
+                        ['0', 'p', 'P', '0', '0', '0', '0', '0'] + \
+                        ['0', '0', 'B', '0', 'R', 'p', 'b', '0'] + \
+                        ['0', '0', '0', '0', '0', '0', '0', '0'] + \
+                        ['P', 'P', 'P', 'K', '0', 'P', 'P', 'P'] + \
+                        ['0', '0', '0', '0', '0', '0', '0', '0']
+
 
 class App:
     """
@@ -53,7 +62,7 @@ class App:
         self.ai = ChessAI()
         self.depth = 3
 
-        self.board = Board()
+        self.board = Board(white_wins_one_move)
         self.load_pieces()
         self.update_board()
         self.from_piece = None
@@ -138,6 +147,11 @@ class App:
     def stop_2player(self):
         self.two_player = False
 
+    def start_game(self):
+        self.state = 'playing'
+        self.color = 'White'
+        self.board = Board()
+
     def run(self):
         """
         Main loop used to control game state
@@ -151,9 +165,10 @@ class App:
                 self.update_board()
             elif self.state == 'gameover':
                 self.end_events()
+                self.end_draw()
             else:
                 self.running = False
-            self.clock.tick(60)
+            self.clock.tick(120)
         pygame.quit()
         sys.exit()
 
@@ -171,7 +186,7 @@ class App:
         self.difficulty_button('Hard', 510, 250, 90, 50, WHITE, DARK_GRAY, 4)
         self.button('Human vs AI', 200, 350, 180, 50, WHITE, DARK_GRAY, self.stop_2player)
         self.button('Human vs Human', 420, 350, 180, 50, WHITE, DARK_GRAY, self.start_2player)
-        self.button('Press Spacebar to Start', 200, 450, 400, 50, WHITE, WHITE)
+        self.button('Press Spacebar to Start', 200, 450, 400, 50, WHITE, WHITE, self.start_game)
         self.button('Default play mode is Human vs AI.', 
                      100, 650, 600, 50, LIGHT_GRAY, LIGHT_GRAY)
         self.button('Default difficulty is Medium. Playing in Hard difficulty will take longer.',
@@ -201,6 +216,13 @@ class App:
                 time.sleep(1)
         elif self.rules.is_stalemate(self.board, self.color):
             self.state = 'gameover'
+
+    def move_piece(self, from_idx, to_idx):
+        self.board.move_piece(from_idx, to_idx)
+        self.print_move(from_idx, to_idx)
+        self.update_board()
+        self.board.print_board()
+        self.update_game_state()
 
     def playing_events(self):
         for event in pygame.event.get():
@@ -247,39 +269,38 @@ class App:
                     pygame.display.update()
                     time.sleep(2)
                 else:
-                    # Move piece
-                    self.board.move_piece(from_idx, to_idx)
-                    self.print_move(from_idx, to_idx)
-                    self.update_game_state()
-                    self.update_board()
-                    self.board.print_board()
+                    self.move_piece(from_idx, to_idx)
 
-            if self.color == 'Black' and not self.two_player:
+            if self.color == 'Black' and not self.two_player and self.state == 'playing':
                 start = time.perf_counter()
                 print('\nGenerating AI move...')
                 from_idx, to_idx = self.ai.get_best_move(self.board, True, self.depth)
                 end = time.perf_counter()
                 print(f'Took {round(end-start, 2)}secs to generate AI move')
-                self.print_move(from_idx, to_idx)
-                self.board.move_piece(from_idx, to_idx)
-                self.board.print_board()
-                self.update_game_state()
-                
-    def end_events(self):                   
+                self.move_piece(from_idx, to_idx)
+
+    def end_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.start_game()
+
+    def end_draw(self):                   
         if self.rules.is_check(self.board, self.color):
             if self.color == 'White':
-                self.color = 'Black'
+                winner = 'Black'
             else:
-                self.color = 'White'
-            self.button(f'Checkmate! {self.color} wins', 200, 375, 400, 50,
-                        WHITE, LIGHT_GRAY)
+                winner = 'White'
+            self.button(f'Checkmate! {winner} wins', 250, 450, 300, 50,
+                        WHITE, WHITE)
         else:
-            self.button(f'Game Over! Stalemate', 200, 375, 400, 50,
-                        WHITE, LIGHT_GRAY)
+            self.button(f'Game Over! Stalemate', 250, 450, 300, 50,
+                        WHITE, WHITE)
+
+        self.button('Press Spacebar to Start', 250, 550, 300, 50,
+                    WHITE, LIGHT_GRAY, self.start_game)
         pygame.display.update()
-        time.sleep(3)
-        self.board = Board()
-        self.state = 'start'
 
 
 if __name__ == '__main__':

@@ -18,10 +18,8 @@ class Board:
         else:
             self.board = board
 
-        self.white_castleK = True
-        self.white_castleQ = True
-        self.black_castleK = True
-        self.black_castleQ = True
+        self.white_can_castle = True
+        self.black_can_castle = True
 
     def print_board(self):
         print('\n  0 1 2 3 4 5 6 7')
@@ -49,35 +47,43 @@ class Board:
         # Pawn promotion
         elif piece == 'p' and to_idx // 8 == 7:
             self.board[to_idx] = 'q'
-            self.board[from_idx] = 0
+            self.board[from_idx] = '0'
         elif piece == 'P' and to_idx // 8 == 0:
             self.board[to_idx] = 'Q'
-            self.board[from_idx] = 0
+            self.board[from_idx] = '0'
         # Check for castling
-        elif piece == 'k' and to_idx == 0:
-            self.black_castleQ = False
-            self.board[0] = '0'
-            self.board[1] = 'k'
-            self.board[2] = 'r'
-            self.board[4] = '0'
-        elif piece == 'k' and to_idx == 7:
-            self.black_castleK = False
-            self.board[4] = '0'
-            self.board[5] = 'r'
-            self.board[6] = 'k'
-            self.board[7] = '0'
-        elif piece == 'K' and to_idx == 56:
-            self.white_castleQ = False
-            self.board[56] = '0'
-            self.board[57] = 'K'
-            self.board[58] = 'R'
-            self.board[60] = '0'
-        elif piece == 'K' and  to_idx == 63:
-            self.white_castleK = False
-            self.board[60] = '0'
-            self.board[61] = 'R'
-            self.board[62] = 'K'
-            self.board[63] = '0'
+        elif piece == 'k':
+            if to_idx == 0 and self.black_can_castle:
+                self.board[0] = '0'
+                self.board[1] = 'k'
+                self.board[2] = 'r'
+                self.board[4] = '0'
+            elif to_idx == 7 and self.black_can_castle:
+                self.board[4] = '0'
+                self.board[5] = 'r'
+                self.board[6] = 'k'
+                self.board[7] = '0'
+            else:
+                # Normal move to empty square
+                self.board[from_idx] = '0'
+                self.board[to_idx] = piece
+            # Update castling rights
+            self.black_can_castle = False
+        elif piece == 'K':
+            if to_idx == 56 and self.white_can_castle:
+                self.board[56] = '0'
+                self.board[57] = 'K'
+                self.board[58] = 'R'
+                self.board[60] = '0'
+            elif to_idx == 63 and self.white_can_castle:                
+                self.board[60] = '0'
+                self.board[61] = 'R'
+                self.board[62] = 'K'
+                self.board[63] = '0'
+            else:
+                self.board[from_idx] = '0'
+                self.board[to_idx] = piece
+            self.white_can_castle = False
         else:
             # Normal move to empty square
             self.board[from_idx] = '0'

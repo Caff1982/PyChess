@@ -12,7 +12,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pygame.
 pip install pygame
 ```
 
-After installing the prerequisites and cloning this repo the  program can then be run using:
+After installing the prerequisites and cloning this repo the program can then be run using:
 
 ```bash
 python main.py
